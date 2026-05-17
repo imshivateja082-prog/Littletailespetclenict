@@ -1,0 +1,236 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum ServiceType {
+  VACCINATION
+  GROOMING
+  PET_FOOD_NUTRITION
+  MEDICINE
+  GENERAL_CHECKUP
+}
+
+enum ReminderType {
+  VACCINATION
+  APPOINTMENT
+  HEALTH_CHECKUP
+  MEDICATION
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  phone         String?
+  role          Role      @default(USER)
+  avatar        String?
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  pets          Pet[]
+  appointments  Appointment[]
+  notifications Notification[]
+  chatMessages  ChatMessage[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Pet {
+  id               String    @id @default(cuid())
+  registrationNo   String    @unique @default(cuid())
+  name             String
+  species          String
+  breed            String
+  age              Int
+  weight           Float?
+  gender           Gender
+  color            String?
+  microchipId      String?
+  avatar           String?
+  allergies        String?
+  complications    String?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  ownerId          String
+  owner            User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  appointments     Appointment[]
+  vaccinations     Vaccination[]
+  medicalRecords   MedicalRecord[]
+  reminders        Reminder[]
+
+  @@map("pets")
+}
+
+model Appointment {
+  id            String            @id @default(cuid())
+  date          DateTime
+  time          String
+  serviceType   ServiceType
+  status        AppointmentStatus @default(PENDING)
+  notes         String?
+  reason        String?
+  adminNotes    String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  petId         String
+  pet           Pet               @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}
+
+model Vaccination {
+  id              String    @id @default(cuid())
+  vaccineName     String
+  dateAdministered DateTime
+  nextDueDate     DateTime?
+  batchNumber     String?
+  veterinarian    String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  petId           String
+  pet             Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("vaccinations")
+}
+
+model MedicalRecord {
+  id              String    @id @default(cuid())
+  patientHistory  String?
+  diagnosis       String
+  treatment     String
+  prescription  String?
+  veterinarian  String?
+  visitDate     DateTime
+  followUpDate  DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  petId         String
+  pet           Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("medical_records")
+}
+
+model Medicine {
+  id            String    @id @default(cuid())
+  name          String
+  category      String
+  description   String?
+  quantity       Int       @default(0)
+  unit          String
+  price         Float
+  expiryDate    DateTime?
+  manufacturer  String?
+  batchNumber   String?
+  minStock      Int       @default(10)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("medicines")
+}
+
+model Notification {
+  id            String           @id @default(cuid())
+  title         String
+  message       String
+  type          NotificationType
+  isRead        Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Reminder {
+  id            String       @id @default(cuid())
+  type          ReminderType
+  title         String
+  message       String
+  dueDate       DateTime
+  isSent        Boolean      @default(false)
+  sentAt        DateTime?
+  createdAt     DateTime     @default(now())
+
+  petId         String
+  pet           Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
+}
+
+model ChatMessage {
+  id            String    @id @default(cuid())
+  role          String    // 'user' or 'assistant'
+  content       String
+  createdAt     DateTime  @default(now())
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
