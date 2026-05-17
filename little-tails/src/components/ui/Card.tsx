@@ -6,12 +6,13 @@ import { cn } from '@/lib/utils';
 interface CardProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   onClick?: () => void;
 }
 
-export default function Card({ children, className, hover = false, padding = 'md', onClick }: CardProps) {
+export default function Card({ children, className, style, hover = false, padding = 'md', onClick }: CardProps) {
   const paddings = {
     none: '',
     sm: 'p-4',
@@ -21,6 +22,7 @@ export default function Card({ children, className, hover = false, padding = 'md
 
   return (
     <div
+      style={style}
       className={cn(
         'bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)]',
         paddings[padding],

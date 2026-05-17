@@ -294,12 +294,7 @@ export default function OfflinePetsPage() {
       </div>
 
       {/* Main Card */}
-      <Card
-        className="relative overflow-hidden"
-        style={{
-          animation: 'fadeUp 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both',
-        }}
-      >
+      <Card className="relative overflow-hidden" style={{ animation: 'fadeUp 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both' }}>
         {/* Top gradient bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1565C0] via-[#42A5F5] to-[#1565C0]" />
 
